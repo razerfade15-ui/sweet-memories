@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fff6fb;
+      --panel: rgba(255, 255, 255, 0.95);
+      --text: #4b2f4b;
+      --muted: #7c5d78;
+      --accent: #db6b99;
+      --accent-soft: #ffe1ef;
+      --shadow: 0 24px 80px rgba(120, 58, 90, 0.12);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #ffe6f2 0%, #fff6fb 35%, #fdf1f8 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: min(100%, 880px);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .hero {
+      padding: 42px 36px 24px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 4vw, 4.4rem);
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 18px auto 0;
+      max-width: 620px;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .slideshow {
+      position: relative;
+      overflow: hidden;
+      background: #fff0f7;
+      min-height: 420px;
+    }
+
+    .slide {
+      width: 100%;
+      height: 420px;
+      object-fit: cover;
+      display: none;
+      will-change: opacity;
+    }
+
+    .slide.active {
+      display: block;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(1.02); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .controls {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+
+    .button {
+      pointer-events: auto;
+      border: none;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--accent);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 25px rgba(218, 110, 149, 0.18);
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .media {
+      display: grid;
+      gap: 22px;
+      padding: 28px 36px 36px;
+    }
+
+    .audio-card,
+    .note-card {
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid rgba(219, 107, 153, 0.16);
+      padding: 22px 24px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .audio-card h2,
+    .note-card h2 {
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+    }
+
+    .audio-card audio {
+      width: 100%;
+      border-radius: 16px;
+      outline: none;
+    }
+
+    .spotify-embed {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(219, 107, 153, 0.16);
+    }
+
+    .spotify-embed h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #9c4f82;
+    }
+
+    .spotify-embed iframe {
+      width: 100%;
+      min-height: 80px;
+      border: none;
+      border-radius: 16px;
+    }
+
+    .reveal-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #f6b3d1, #db6b99);
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 16px 30px rgba(219, 107, 153, 0.18);
+    }
+
+    .reveal-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .note {
+      margin: 0;
+      line-height: 1.85;
+      color: #5f3f5f;
+      font-family: "Reenie Beanie", "Homemade Apple", cursive, sans-serif;
+      font-size: 1.12rem;
+      white-space: pre-wrap;
+      min-height: 190px;
+      position: relative;
+    }
+
+    .note.hidden {
+      display: none;
+    }
+
+    .note::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      border: 1px dashed rgba(219, 107, 153, 0.4);
+      border-radius: 18px;
+      pointer-events: none;
+    }
+
+    .hint {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .typed {
+      display: inline;
+      white-space: pre-wrap;
+    }
+
+    .hero .subtitle {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #a25f8d;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 12px 0 18px;
+      color: #a976a3;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 680px) {
+      .hero {
+        padding: 30px 22px 18px;
+      }
+      .slideshow {
+        min-height: 300px;
+      }
+      .slide {
+        height: 300px;
+      }
+      .media {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <article class="card">
+    <section class="hero">
+      <h1>Just for you</h1>
+      <p class="subtitle">A little page with our memories, a favorite song, and a note from my heart.</p>
+    </section>
+
+    <section class="slideshow">
+      <img class="slide active" src="tgt.jpeg" alt="Memory 1" />
+      <img class="slide" src="tya.jpeg" alt="Memory 2" />
+      <img class="slide" src="pd.jpeg" alt="Memory 3" />
+      <div class="controls">
+        <button class="button" id="prev" aria-label="Previous photo">‹</button>
+        <button class="button" id="next" aria-label="Next photo">›</button>
+      </div>
+    </section>
+
+    <section class="media">
+      <div class="audio-card">
+        <h2>Our song</h2>
+        <audio controls>
+          <source src="bestfriend-alyph.mp3" type="audio/mpeg" />
+          Your browser does not support audio playback.
+        </audio>
+        <div class="spotify-embed">
+          <h3>Spotify embed (optional)</h3>
+          <iframe src="https://open.spotify.com/embed/track/75DnXTAoFiorMrqkPVbjSH" allow="encrypted-media" loading="lazy"></iframe>
+          <p class="hint">Replace the track URL with your own Spotify song URL if you want.</p>
+        </div>
+      </div>
+
+      <div class="note-card">
+        <h2>My note to you</h2>
+        <button class="reveal-button" id="reveal-note-button">Reveal my note</button>
+        <p class="note hidden" id="note-content"><span class="typed" id="typed-note"></span></p>
+        <p class="hint">Click the button to open the surprise message.</p>
+      </div>
+    </section>
+  </article>
+
+  <div class="footer">Tip: replace the image files and audio file with your own favorites.</div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const prevButton = document.getElementById('prev');
+    const nextButton = document.getElementById('next');
+    const revealButton = document.getElementById('reveal-note-button');
+    const noteContent = document.getElementById('note-content');
+    let currentSlide = 0;
+    let noteIndex = 0;
+    let typedStarted = false;
+
+    function showSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      currentSlide = (index + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+    }
+
+    prevButton.addEventListener('click', () => showSlide(currentSlide - 1));
+    nextButton.addEventListener('click', () => showSlide(currentSlide + 1));
+
+    setInterval(() => showSlide(currentSlide + 1), 6000);
+
+    const noteText = `Dear love,
+
+I made this page for you because every moment with you feels magical.
+
+I hope these memories and this song make you smile.
+
+Love always,
+[Adam :3]`;
+
+    const typedElement = document.getElementById('typed-note');
+
+    function typeNextChar() {
+      if (noteIndex < noteText.length) {
+        typedElement.textContent += noteText[noteIndex++];
+        const delay = noteText[noteIndex - 1] === '\n' ? 120 : 45;
+        setTimeout(typeNextChar, delay);
+      }
+    }
+
+    revealButton.addEventListener('click', () => {
+      const hidden = noteContent.classList.toggle('hidden');
+      revealButton.textContent = hidden ? 'Reveal my note' : 'Hide my note';
+      if (!hidden && !typedStarted) {
+        typedStarted = true;
+        typeNextChar();
+      }
+    });
+  </script>
+</body>
+</html>
